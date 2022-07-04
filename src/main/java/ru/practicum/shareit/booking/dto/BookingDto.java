@@ -12,7 +12,7 @@ public class BookingDto {
     private Long booker;
     private Status status;
 
-    static private class Item {
+    static class Item {
         private Long id;
         private String name;
         private String description;

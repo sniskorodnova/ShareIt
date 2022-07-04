@@ -8,7 +8,7 @@ public class ItemRequestDto {
     private User requestor;
     private LocalDateTime created;
 
-    static private class User {
+    static class User {
         private Long id;
         private String name;
     }

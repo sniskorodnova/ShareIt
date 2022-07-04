@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User create(User user) throws ValidationException {
         for (User userToFind : userStorage.getAll()) {
-            if(userToFind.getEmail().equals(user.getEmail())) {
+            if (userToFind.getEmail().equals(user.getEmail())) {
                 throw new ValidationException("Пользователь с таким email уже существует");
             }
         }
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
             user.setEmail(userFromList.getEmail());
         }
         for (User userToFind : userStorage.getAll()) {
-            if((!Objects.equals(userToFind.getId(), user.getId())) && userToFind.getEmail().equals(user.getEmail())) {
+            if ((!Objects.equals(userToFind.getId(), user.getId())) && userToFind.getEmail().equals(user.getEmail())) {
                 throw new ValidationException("Пользователь с таким email уже существует");
             }
         }

@@ -58,7 +58,7 @@ public class UserController {
      * Метод для получения списка всех пользователей
      */
     @GetMapping
-    public List<UserDto> getAll(){
+    public List<UserDto> getAll() {
         List<UserDto> listUserDto = new ArrayList<>();
         log.debug("Входящий запрос на получение всех пользователей");
         for (User user : userService.getAll()) {
@@ -71,7 +71,7 @@ public class UserController {
      * Метод для удаления пользователя по id
      */
     @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable Long id){
+    public void deleteById(@PathVariable Long id) {
         log.debug("Входящий запрос на удаление пользователя c id = {}", id);
         userService.deleteById(id);
     }
