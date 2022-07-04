@@ -2,6 +2,9 @@ package ru.practicum.shareit.user.dto;
 
 import ru.practicum.shareit.user.model.User;
 
+/**
+ * Класс, описывающий маппинг пользователя в модель dto и обратно
+ */
 public class UserMapper {
     public static UserDto toUserDto(User user) {
         return new UserDto(

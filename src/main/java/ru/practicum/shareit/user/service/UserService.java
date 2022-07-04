@@ -5,6 +5,9 @@ import ru.practicum.shareit.exception.ValidationException;
 
 import java.util.List;
 
+/**
+ * Интерфейс, описывающий логику для работы сервиса пользователей
+ */
 public interface UserService {
     User create(User user) throws ValidationException;
 

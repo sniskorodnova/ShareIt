@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Класс, описывающий модель пользователя
+ */
 @Data
 @AllArgsConstructor
 public class User {

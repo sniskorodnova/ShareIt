@@ -1,5 +1,8 @@
 package ru.practicum.shareit.exception;
 
+/**
+ * Класс, описывающий вид возвращаемой пользователю ошибки
+ */
 public class ErrorResponse {
     String error;
 

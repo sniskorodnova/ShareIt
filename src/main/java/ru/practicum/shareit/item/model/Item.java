@@ -6,6 +6,9 @@ import ru.practicum.shareit.requests.model.ItemRequest;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Класс, описывающий модель вещь
+ */
 @Data
 @AllArgsConstructor
 public class Item {

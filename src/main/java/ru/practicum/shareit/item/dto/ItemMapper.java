@@ -2,6 +2,9 @@ package ru.practicum.shareit.item.dto;
 
 import ru.practicum.shareit.item.model.Item;
 
+/**
+ * Класс, описывающий маппинг вещи в модель dto и обратно
+ */
 public class ItemMapper {
     public static ItemDto toItemDto(Item item) {
         return new ItemDto(

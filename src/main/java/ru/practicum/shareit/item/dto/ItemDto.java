@@ -6,6 +6,9 @@ import lombok.Data;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+/**
+ * Класс-dto, описывающий сущность вещь
+ */
 @Data
 @AllArgsConstructor
 public class ItemDto {

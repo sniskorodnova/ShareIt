@@ -18,6 +18,9 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Класс-контроллер для работы с вещами
+ */
 @Validated
 @RestController
 @Slf4j
@@ -26,6 +29,9 @@ import java.util.List;
 public class ItemController {
     private final ItemService itemService;
 
+    /**
+     * Метод для создания вещи
+     */
     @PostMapping
     public ItemDto create(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                           @Valid @RequestBody ItemDto item) throws NoHeaderException, ValidationException {
@@ -38,6 +44,9 @@ public class ItemController {
         }
     }
 
+    /**
+     * Метод для редактирования вещи
+     */
     @PatchMapping("/{id}")
     public ItemDto update(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                           @PathVariable Long id, @RequestBody ItemDto item)
@@ -51,6 +60,9 @@ public class ItemController {
         }
     }
 
+    /**
+     * Метод для получения вещи по ее id
+     */
     @GetMapping("/{id}")
     public ItemDto getById(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                            @PathVariable Long id) throws NoHeaderException, ValidationException {
@@ -62,6 +74,9 @@ public class ItemController {
         }
     }
 
+    /**
+     * Метод для получения всех вещей
+     */
     @GetMapping
     public List<ItemDto> getAll(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId)
             throws NoHeaderException, ValidationException {
@@ -77,6 +92,9 @@ public class ItemController {
         }
     }
 
+    /**
+     * Метод для поиска вещей по буквосочетанию
+     */
     @GetMapping("/search")
     public List<ItemDto> searchByText(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                                       @RequestParam String text) throws NoHeaderException, ValidationException {

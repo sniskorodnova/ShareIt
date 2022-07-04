@@ -6,6 +6,9 @@ import ru.practicum.shareit.exception.ValidationException;
 
 import java.util.List;
 
+/**
+ * Интерфейс, описывающий логику для работы сервиса вещей
+ */
 public interface ItemService {
     Item create(Long userId, Item item) throws ValidationException;
 

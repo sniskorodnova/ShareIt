@@ -10,6 +10,9 @@ import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.*;
 
+/**
+ * Класс, имплементирующий интерфейс для работы сервиса вещей
+ */
 @Service
 public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
@@ -21,6 +24,9 @@ public class ItemServiceImpl implements ItemService {
         this.userStorage = userStorage;
     }
 
+    /**
+     * Метод для создания вещи
+     */
     @Override
     public Item create(Long userId, Item item) throws ValidationException {
         if (userStorage.getById(userId) != null) {
@@ -31,6 +37,9 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    /**
+     * Метод для редактирования вещи
+     */
     @Override
     public Item update(Long userId, Long id, Item item) throws ValidationException, AuthFailedException {
         Item itemFromList = itemStorage.getById(id);
@@ -54,6 +63,9 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    /**
+     * Метод для получения вещи по id
+     */
     @Override
     public Item getById(Long userId, Long id) throws ValidationException {
         if (userStorage.getById(userId) == null) {
@@ -63,6 +75,9 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    /**
+     * Метод для получения списка всех вещей
+     */
     @Override
     public List<Item> getAll(Long userId) throws ValidationException {
         if (userStorage.getById(userId) == null) {
@@ -78,6 +93,9 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    /**
+     * Метод для поиска вещей по буквосочетанию
+     */
     @Override
     public List<Item> searchByText(Long userId, String searchText) throws ValidationException {
         if (userStorage.getById(userId) != null) {

@@ -6,6 +6,9 @@ import lombok.Data;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
+/**
+ * Класс-dto, описывающий сущность пользователя
+ */
 @Data
 @AllArgsConstructor
 public class UserDto {

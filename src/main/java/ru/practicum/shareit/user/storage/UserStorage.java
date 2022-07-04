@@ -4,6 +4,9 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
+/**
+ * Интерфейс, описывающий логику сохранения данных для сущностей пользователей
+ */
 public interface UserStorage {
     User create(User user);
 
