@@ -30,8 +30,7 @@ public class UserController {
      */
     @PostMapping
     public UserDto create(@Valid @RequestBody UserDto user) throws ValidationException {
-        log.debug("Входящий запрос на создание пользователя");
-        log.debug(user.toString());
+        log.debug("Входящий запрос на создание пользователя" + user.toString());
         return UserMapper.toUserDto(userService.create(UserMapper.toUser(user)));
     }
 
@@ -40,8 +39,7 @@ public class UserController {
      */
     @PatchMapping("/{id}")
     public UserDto update(@PathVariable Long id, @RequestBody UserDto user) throws ValidationException {
-        log.debug("Входящий запрос на редактирование пользователя");
-        log.debug(user.toString());
+        log.debug("Входящий запрос на редактирование пользователя" + user.toString());
         return UserMapper.toUserDto(userService.update(id, UserMapper.toUser(user)));
     }
 

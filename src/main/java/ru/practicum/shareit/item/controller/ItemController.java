@@ -35,8 +35,7 @@ public class ItemController {
     @PostMapping
     public ItemDto create(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                           @Valid @RequestBody ItemDto item) throws NoHeaderException, ValidationException {
-        log.debug("Входящий запрос на создание вещи");
-        log.debug(item.toString());
+        log.debug("Входящий запрос на создание вещи" + item.toString());
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
@@ -51,8 +50,7 @@ public class ItemController {
     public ItemDto update(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                           @PathVariable Long id, @RequestBody ItemDto item)
             throws NoHeaderException, ValidationException, AuthFailedException {
-        log.debug("Входящий запрос на редактирование вещи");
-        log.debug(item.toString());
+        log.debug("Входящий запрос на редактирование вещи" + item.toString());
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
