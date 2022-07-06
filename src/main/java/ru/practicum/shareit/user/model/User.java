@@ -1,23 +1,18 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.user.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.practicum.shareit.requests.model.ItemRequest;
-
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Класс, описывающий модель вещь
+ * Класс, описывающий модель пользователя
  */
 @Data
 @AllArgsConstructor
-public class Item {
+public class User {
     private Long id;
     private String name;
-    private String description;
-    private Boolean available;
-    private Long owner;
-    private ItemRequest request;
+    private String email;
     private static AtomicLong counter = new AtomicLong(0);
 
     public static Long setIdCounter() {
