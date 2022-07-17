@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.service;
 
+import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.exception.ValidationException;
 
@@ -13,7 +14,7 @@ public interface UserService {
 
     User update(Long id, User user) throws ValidationException;
 
-    User getById(Long id);
+    User getById(Long id) throws ValidationException, UserNotFoundException;
 
     void deleteById(Long id);
 

@@ -2,25 +2,27 @@ package ru.practicum.shareit.item.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.practicum.shareit.requests.model.ItemRequest;
+import lombok.NoArgsConstructor;
 
-import java.util.concurrent.atomic.AtomicLong;
+import javax.persistence.*;
 
 /**
  * Класс, описывающий модель вещь
  */
+@Entity
+@Table(name = "items", schema = "public")
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Item {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String description;
     private Boolean available;
-    private Long owner;
-    private ItemRequest request;
-    private static AtomicLong counter = new AtomicLong(0);
-
-    public static Long setIdCounter() {
-        return counter.incrementAndGet();
-    }
+    @Column(name = "owner_id", nullable = false)
+    private Long ownerId;
+    @Column(name = "request_id")
+    private Long requestId;
 }

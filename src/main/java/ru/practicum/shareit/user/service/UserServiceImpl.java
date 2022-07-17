@@ -2,23 +2,25 @@ package ru.practicum.shareit.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Класс, имплементирующий интерфейс для работы сервиса пользователей
  */
 @Service
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
 
     @Autowired
-    public UserServiceImpl(UserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     /**
@@ -26,12 +28,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User create(User user) throws ValidationException {
-        for (User userToFind : userStorage.getAll()) {
-            if (userToFind.getEmail().equals(user.getEmail())) {
-                throw new ValidationException("Пользователь с таким email уже существует");
-            }
-        }
-        return userStorage.create(user);
+        return userRepository.save(user);
     }
 
     /**
@@ -39,28 +36,32 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User update(Long id, User user) throws ValidationException {
-        User userFromList = userStorage.getById(id);
+        Optional<User> userFromList = userRepository.findById(id);
         user.setId(id);
         if (user.getName() == null) {
-            user.setName(userFromList.getName());
+            user.setName(userFromList.get().getName());
         }
         if (user.getEmail() == null) {
-            user.setEmail(userFromList.getEmail());
+            user.setEmail(userFromList.get().getEmail());
         }
-        for (User userToFind : userStorage.getAll()) {
+        for (User userToFind : userRepository.findAll()) {
             if ((!Objects.equals(userToFind.getId(), user.getId())) && userToFind.getEmail().equals(user.getEmail())) {
                 throw new ValidationException("Пользователь с таким email уже существует");
             }
         }
-        return userStorage.update(user);
+        return userRepository.save(user);
     }
 
     /**
      * Метод для получения пользователя по id
      */
     @Override
-    public User getById(Long id) {
-        return userStorage.getById(id);
+    public User getById(Long id) throws UserNotFoundException {
+        if (userRepository.findById(id).isEmpty()) {
+            throw new UserNotFoundException("User with id = " + id + " doesn't exist");
+        } else {
+            return userRepository.findById(id).get();
+        }
     }
 
     /**
@@ -68,7 +69,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<User> getAll() {
-        return userStorage.getAll();
+        return userRepository.findAll();
     }
 
     /**
@@ -76,6 +77,6 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void deleteById(Long id) {
-        userStorage.deleteById(id);
+        userRepository.deleteById(id);
     }
 }

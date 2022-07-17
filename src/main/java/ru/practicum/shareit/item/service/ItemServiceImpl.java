@@ -3,11 +3,18 @@ package ru.practicum.shareit.item.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.AuthFailedException;
+import ru.practicum.shareit.exception.ItemNotFoundException;
+import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.item.storage.CommentRepository;
+import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.storage.UserRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -15,25 +22,28 @@ import java.util.*;
  */
 @Service
 public class ItemServiceImpl implements ItemService {
-    private final ItemStorage itemStorage;
-    private final UserStorage userStorage;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
 
     @Autowired
-    public ItemServiceImpl(ItemStorage itemStorage, UserStorage userStorage) {
-        this.itemStorage = itemStorage;
-        this.userStorage = userStorage;
+    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository,
+                           CommentRepository commentRepository) {
+        this.itemRepository = itemRepository;
+        this.userRepository = userRepository;
+        this.commentRepository = commentRepository;
     }
 
     /**
      * Метод для создания вещи
      */
     @Override
-    public Item create(Long userId, Item item) throws ValidationException {
-        if (userStorage.getById(userId) != null) {
-            item.setOwner(userId);
-            return itemStorage.create(item);
+    public Item create(Long userId, Item item) throws ValidationException, UserNotFoundException {
+        if (userRepository.findById(userId).isPresent()) {
+            item.setOwnerId(userId);
+            return itemRepository.save(item);
         } else {
-            throw new ValidationException("No user with id = " + userId);
+            throw new UserNotFoundException("No user with id = " + userId);
         }
     }
 
@@ -42,24 +52,23 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public Item update(Long userId, Long id, Item item) throws ValidationException, AuthFailedException {
-        Item itemFromList = itemStorage.getById(id);
-        if (userStorage.getById(userId) == null) {
-            throw new ValidationException("No user with id = " + userId);
-        } else if (!Objects.equals(userId, itemFromList.getOwner())) {
+        Optional<Item> itemFromList = itemRepository.findById(id);
+        userRepository.findById(userId);
+        if (!Objects.equals(userId, itemFromList.get().getOwnerId())) {
             throw new AuthFailedException("Item doesn't belong to user with id = " + userId);
         } else {
-            item.setOwner(userId);
+            item.setOwnerId(userId);
             item.setId(id);
             if (item.getName() == null) {
-                item.setName(itemFromList.getName());
+                item.setName(itemFromList.get().getName());
             }
             if (item.getDescription() == null) {
-                item.setDescription(itemFromList.getDescription());
+                item.setDescription(itemFromList.get().getDescription());
             }
             if (item.getAvailable() == null) {
-                item.setAvailable(itemFromList.getAvailable());
+                item.setAvailable(itemFromList.get().getAvailable());
             }
-            return itemStorage.update(item);
+            return itemRepository.save(item);
         }
     }
 
@@ -67,11 +76,15 @@ public class ItemServiceImpl implements ItemService {
      * Метод для получения вещи по id
      */
     @Override
-    public Item getById(Long userId, Long id) throws ValidationException {
-        if (userStorage.getById(userId) == null) {
-            throw new ValidationException("No user with id = " + userId);
+    public Item getById(Long userId, Long id) throws ItemNotFoundException, UserNotFoundException {
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new UserNotFoundException("No user with id = " + userId);
         } else {
-            return itemStorage.getById(id);
+            if (itemRepository.findById(id).isEmpty()) {
+                throw new ItemNotFoundException("No item with id = " + id);
+            } else {
+                return itemRepository.findById(id).get();
+            }
         }
     }
 
@@ -79,13 +92,13 @@ public class ItemServiceImpl implements ItemService {
      * Метод для получения списка всех вещей
      */
     @Override
-    public List<Item> getAll(Long userId) throws ValidationException {
-        if (userStorage.getById(userId) == null) {
-            throw new ValidationException("No user with id = " + userId);
+    public List<Item> getAll(Long userId) throws UserNotFoundException {
+        if (!userRepository.findById(userId).isPresent()) {
+            throw new UserNotFoundException("No user with id = " + userId);
         } else {
             List<Item> itemToReturn = new ArrayList<>();
-            for (Item item : itemStorage.getAll()) {
-                if (Objects.equals(item.getOwner(), userId)) {
+            for (Item item : itemRepository.findAll()) {
+                if (Objects.equals(item.getOwnerId(), userId)) {
                     itemToReturn.add(item);
                 }
             }
@@ -98,22 +111,33 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public List<Item> searchByText(Long userId, String searchText) throws ValidationException {
-        if (userStorage.getById(userId) != null) {
-            List<Item> foundItems = new ArrayList<>();
+        if (userRepository.findById(userId).isPresent()) {
             if (searchText.isEmpty()) {
                 return Collections.emptyList();
             } else {
-                for (Item item : itemStorage.getAll()) {
-                    if ((item.getName().toLowerCase().contains(searchText.toLowerCase())
-                            || item.getDescription().toLowerCase().contains(searchText.toLowerCase()))
-                            && item.getAvailable()) {
-                        foundItems.add(item);
-                    }
-                }
-                return foundItems;
+                return itemRepository.search(searchText);
             }
         } else {
             throw new ValidationException("No user with id = " + userId);
         }
+    }
+
+    @Override
+    public Comment createComment(Long userId, Long itemId, Comment comment) throws UserNotFoundException {
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new UserNotFoundException("No user with id = " + userId);
+        } else {
+            User user = userRepository.findById(userId).orElseThrow();
+            Item item = itemRepository.findById(itemId).orElseThrow();
+            comment.setItem(item);
+            comment.setAuthor(user);
+            comment.setCreated(LocalDate.now());
+            return commentRepository.save(comment);
+        }
+    }
+
+    @Override
+    public List<Comment> getCommentsForItem(Long itemId) {
+        return commentRepository.findByItem_id(itemId);
     }
 }

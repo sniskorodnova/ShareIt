@@ -2,8 +2,11 @@ package ru.practicum.shareit.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exception.ErrorResponse;
+import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
@@ -47,7 +50,7 @@ public class UserController {
      * Метод для получения пользователя по id
      */
     @GetMapping("/{id}")
-    public UserDto getById(@PathVariable Long id) {
+    public UserDto getById(@PathVariable Long id) throws UserNotFoundException, ValidationException {
         log.debug("Входящий запрос на получение пользователя c id = {}", id);
         return UserMapper.toUserDto(userService.getById(id));
     }
@@ -72,5 +75,11 @@ public class UserController {
     public void deleteById(@PathVariable Long id) {
         log.debug("Входящий запрос на удаление пользователя c id = {}", id);
         userService.deleteById(id);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleUserNotFound(final UserNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
     }
 }
