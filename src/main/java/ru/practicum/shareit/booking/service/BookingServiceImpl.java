@@ -46,8 +46,9 @@ public class BookingServiceImpl implements BookingService {
                         + booking.getItem().getId() + " not found");
             } else {
                 if (booking.getStart().isBefore(LocalDateTime.now())
-                        || booking.getEnd().isBefore(LocalDateTime.now())) {
-                    throw new ValidationException("Start date can't be later than end date");
+                        || booking.getEnd().isBefore(LocalDateTime.now())
+                        || booking.getStart().isAfter(booking.getEnd())) {
+                    throw new ValidationException("Booking date is incorrect");
                 } else {
                     if (!itemRepository.findById(booking.getItem().getId()).orElseThrow().getAvailable()) {
                         throw new ValidationException("Item with id = "
