@@ -24,6 +24,8 @@ public interface ItemService {
     Comment createComment(Long userId, Long itemId, Comment comment) throws ValidationException, UserNotFoundException;
 
     List<Comment> getCommentsForItem(Long itemId);
+
     Booking getLastBooking(Long itemId, Long userId);
+
     Booking getNextBooking(Long itemId, Long userId);
 }

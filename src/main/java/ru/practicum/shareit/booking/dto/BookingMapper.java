@@ -23,7 +23,7 @@ public class BookingMapper {
                 null,
                 bookingCreateDto.getStart(),
                 bookingCreateDto.getEnd(),
-                new Item (bookingCreateDto.getItemId(), null, null, null,
+                new Item(bookingCreateDto.getItemId(), null, null, null,
                         null, null),
                 null,
                 null
