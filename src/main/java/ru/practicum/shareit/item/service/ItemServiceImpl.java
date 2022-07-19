@@ -2,19 +2,17 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.AuthFailedException;
-import ru.practicum.shareit.exception.ItemNotFoundException;
-import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.storage.BookingRepository;
+import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -25,13 +23,15 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+    private final BookingRepository bookingRepository;
 
     @Autowired
     public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository,
-                           CommentRepository commentRepository) {
+                           CommentRepository commentRepository, BookingRepository bookingRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     /**
@@ -110,7 +110,7 @@ public class ItemServiceImpl implements ItemService {
      * Метод для поиска вещей по буквосочетанию
      */
     @Override
-    public List<Item> searchByText(Long userId, String searchText) throws ValidationException {
+    public List<Item> searchByText(Long userId, String searchText) throws UserNotFoundException {
         if (userRepository.findById(userId).isPresent()) {
             if (searchText.isEmpty()) {
                 return Collections.emptyList();
@@ -118,26 +118,62 @@ public class ItemServiceImpl implements ItemService {
                 return itemRepository.search(searchText);
             }
         } else {
-            throw new ValidationException("No user with id = " + userId);
+            throw new UserNotFoundException("No user with id = " + userId);
         }
     }
 
+    /**
+     * Метод для создания отзыва к вещи
+     */
     @Override
-    public Comment createComment(Long userId, Long itemId, Comment comment) throws UserNotFoundException {
+    public Comment createComment(Long userId, Long itemId, Comment comment) throws UserNotFoundException,
+            ValidationException {
         if (userRepository.findById(userId).isEmpty()) {
             throw new UserNotFoundException("No user with id = " + userId);
         } else {
-            User user = userRepository.findById(userId).orElseThrow();
-            Item item = itemRepository.findById(itemId).orElseThrow();
-            comment.setItem(item);
-            comment.setAuthor(user);
-            comment.setCreated(LocalDate.now());
-            return commentRepository.save(comment);
+            System.out.println(bookingRepository.findForItem(itemId, userId).size());
+            if (bookingRepository.findForItem(itemId, userId).size() == 0) {
+                throw new ValidationException("User can't create comment for this item");
+            } else {
+                User user = userRepository.findById(userId).orElseThrow();
+                Item item = itemRepository.findById(itemId).orElseThrow();
+                comment.setItem(item);
+                comment.setAuthor(user);
+                comment.setCreated(LocalDate.now());
+                return commentRepository.save(comment);
+            }
         }
     }
 
+    /**
+     * Метод для получения списка отзывов на вещь
+     */
     @Override
     public List<Comment> getCommentsForItem(Long itemId) {
         return commentRepository.findByItem_id(itemId);
+    }
+
+    /**
+     * Метод для получения ближайшего прошедшего бронирования для вещи
+     */
+    @Override
+    public Booking getLastBooking(Long itemId, Long userId) {
+        if (bookingRepository.getLastBooking(itemId, userId).size() == 0) {
+            return null;
+        } else {
+            return bookingRepository.getLastBooking(itemId, userId).get(0);
+        }
+    }
+
+    /**
+     * Метод для получения ближайшего будущего бронирования для вещи
+     */
+    @Override
+    public Booking getNextBooking(Long itemId, Long userId) {
+        if (bookingRepository.getNextBooking(itemId, userId).size() == 0) {
+            return null;
+        } else {
+            return bookingRepository.getNextBooking(itemId, userId).get(0);
+        }
     }
 }

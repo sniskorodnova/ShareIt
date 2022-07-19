@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.dto.BookingDtoItem;
+import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
@@ -71,7 +73,11 @@ public class ItemController {
             for (Comment comment : itemService.getCommentsForItem(id)) {
                 comments.add(CommentMapper.toCommentForItemDto(comment));
             }
-            return ItemMapper.toItemDtoWithComment(itemService.getById(userId, id), comments);
+            BookingDtoItem lastBooking = (itemService.getLastBooking(id, userId)) == null ? null
+                    : BookingMapper.toBookingDtoItem(itemService.getLastBooking(id, userId));
+            BookingDtoItem nextBooking = (itemService.getNextBooking(id, userId)) == null ? null
+                    : BookingMapper.toBookingDtoItem(itemService.getNextBooking(id, userId));
+            return ItemMapper.toItemDtoWithComment(itemService.getById(userId, id), comments, lastBooking, nextBooking);
         }
     }
 
@@ -91,8 +97,12 @@ public class ItemController {
                 for (Comment comment : itemService.getCommentsForItem(item.getId())) {
                     comments.add(CommentMapper.toCommentForItemDto(comment));
                 }
+                BookingDtoItem lastBooking = (itemService.getLastBooking(item.getId(), userId)) == null ? null
+                        : BookingMapper.toBookingDtoItem(itemService.getLastBooking(item.getId(), userId));
+                BookingDtoItem nextBooking = (itemService.getNextBooking(item.getId(), userId)) == null ? null
+                        : BookingMapper.toBookingDtoItem(itemService.getNextBooking(item.getId(), userId));
                 listItemCommentDto.add(ItemMapper.toItemDtoWithComment(itemService.getById(userId, item.getId()),
-                        comments));
+                        comments, lastBooking, nextBooking));
             }
             return listItemCommentDto;
         }
@@ -103,7 +113,7 @@ public class ItemController {
      */
     @GetMapping("/search")
     public List<ItemDto> searchByText(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                                      @RequestParam String text) throws NoHeaderException, ValidationException {
+                                      @RequestParam String text) throws NoHeaderException, UserNotFoundException {
         log.debug("Входящий запрос на поиск вещи");
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
@@ -122,9 +132,12 @@ public class ItemController {
         }
     }
 
+    /**
+     * Метод для создания отзыва к вещи
+     */
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                                    @PathVariable Long itemId, @RequestBody CommentCreateDto comment)
+                                    @PathVariable Long itemId, @RequestBody @Valid CommentCreateDto comment)
             throws NoHeaderException, UserNotFoundException, ValidationException {
         log.debug("Входящий запрос на создание отзыва к вещи" + itemId);
         if (userId == null) {
@@ -138,6 +151,12 @@ public class ItemController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleUserNotFound(final NoHeaderException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidation(final ValidationException e) {
         return new ErrorResponse(e.getMessage());
     }
 

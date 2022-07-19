@@ -2,13 +2,16 @@ package ru.practicum.shareit.item.dto;
 
 import ru.practicum.shareit.item.model.Comment;
 
+/**
+ * Класс, описывающий маппинг отзыва в модели dto и обратно
+ */
 public class CommentMapper {
     public static CommentDto toCommentDto(Comment comment) {
         return new CommentDto(
                 comment.getId(),
                 comment.getText(),
                 comment.getItem(),
-                comment.getAuthor(),
+                comment.getAuthor().getName(),
                 comment.getCreated()
         );
     }
@@ -27,7 +30,7 @@ public class CommentMapper {
         return new CommentForItemDto(
                 comment.getId(),
                 comment.getText(),
-                comment.getAuthor(),
+                comment.getAuthor().getName(),
                 comment.getCreated()
         );
     }

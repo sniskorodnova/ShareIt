@@ -9,6 +9,9 @@ import ru.practicum.shareit.user.model.User;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Класс, описывающий модель бронирования
+ */
 @Entity
 @Table(name = "bookings", schema = "public")
 @Data

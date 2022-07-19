@@ -12,16 +12,14 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.*;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.model.User;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Класс-контроллер для работы с бронированиями
+ */
 @Validated
 @Slf4j
 @RequiredArgsConstructor
@@ -30,19 +28,25 @@ import java.util.List;
 public class BookingController {
     private final BookingService bookingService;
 
+    /**
+     * Метод для создания бронирования
+     */
     @PostMapping
     public BookingDto create(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                             @Valid @RequestBody BookingCreateDto booking) throws ItemUnavailableException,
-            ItemNotFoundException, UserNotFoundException, IncorrectTimeException {
+                             @Valid @RequestBody BookingCreateDto booking) throws ItemNotFoundException,
+            UserNotFoundException, ValidationException {
         log.debug("Входящий запрос на создание запроса на бронирование: " + booking.toString());
         return BookingMapper.toBookingDto(bookingService.create(userId,
                 BookingMapper.toBookingCreate(booking)));
     }
 
+    /**
+     * Метод для изменения статуса бронирования. Изменять статус может только владелей вещи
+     */
     @PatchMapping("/{bookingId}")
     public BookingDto update(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                           @PathVariable Long bookingId, @RequestParam Boolean approved) throws NoHeaderException,
-            UserNotFoundException, BookingNotFoundException, ItemNotBelongsToUserException {
+            UserNotFoundException, BookingNotFoundException, ItemNotBelongsToUserException, ValidationException {
         log.debug("Входящий запрос на редактирование статуса запроса на бронирование");
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
@@ -51,6 +55,9 @@ public class BookingController {
         }
     }
 
+    /**
+     * Метод для получения информации о бронировании
+     */
     @GetMapping("/{bookingId}")
     public BookingDto getById(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                              @PathVariable Long bookingId) throws NoHeaderException,
@@ -63,6 +70,9 @@ public class BookingController {
         }
     }
 
+    /**
+     * Метод для получения всех бронирований пользователя в определенном статусе, запрошенном клиентом
+     */
     @GetMapping()
     public List<BookingDto> getAllBookingsForRequester(@RequestHeader(value = "X-Sharer-User-Id", required = false)
                                                       Long userId, @RequestParam(defaultValue = "ALL") State state)
@@ -79,10 +89,14 @@ public class BookingController {
         }
     }
 
-    @GetMapping("/bookings/owner")
+    /**
+     * Метод для получения списка бронирований для всех вещей пользователя, запрошенного с определенным статусом
+     * от клиента
+     */
+    @GetMapping("/owner")
     public List<BookingDto> getAllBookingsForOwner(@RequestHeader(value = "X-Sharer-User-Id", required = false)
-                                                       Long userId, @RequestParam State state)
-            throws NoHeaderException {
+                                                       Long userId, @RequestParam(defaultValue = "ALL") State state)
+            throws NoHeaderException, UserNotFoundException {
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
@@ -96,14 +110,14 @@ public class BookingController {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleItemNotAvailable(final ItemUnavailableException e) {
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleItemNotFound(final ItemNotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleItemNotFound(final ItemNotFoundException e) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleNoHeader(final NoHeaderException e) {
         return new ErrorResponse(e.getMessage());
     }
 
@@ -114,20 +128,20 @@ public class BookingController {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleIncorrectTime(final IncorrectTimeException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleBookingNotFound(final BookingNotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleItemNotBelongsToUser(final ItemNotBelongsToUserException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidation(final ValidationException e) {
         return new ErrorResponse(e.getMessage());
     }
 }

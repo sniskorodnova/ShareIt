@@ -6,17 +6,20 @@ import ru.practicum.shareit.exception.*;
 
 import java.util.List;
 
+/**
+ * Интерфейс, описывающий логику для работы сервиса бронирований
+ */
 public interface BookingService {
-    Booking create(Long userId, Booking booking) throws ItemUnavailableException, ItemNotFoundException,
-            UserNotFoundException, IncorrectTimeException;
+    Booking create(Long userId, Booking booking) throws ItemNotFoundException, UserNotFoundException,
+            ValidationException;
 
     Booking update(Long userId, Long bookingId, Boolean approved) throws UserNotFoundException,
-            BookingNotFoundException, ItemNotBelongsToUserException;
+            BookingNotFoundException, ItemNotBelongsToUserException, ValidationException;
 
     Booking getById(Long userId, Long bookingId) throws ItemNotBelongsToUserException, UserNotFoundException,
             BookingNotFoundException;
 
     List<Booking> getAllBookingsForRequester(Long userId, State state) throws UserNotFoundException;
 
-    List<Booking> getAllBookingsForOwner(Long userId, State state);
+    List<Booking> getAllBookingsForOwner(Long userId, State state) throws UserNotFoundException;
 }

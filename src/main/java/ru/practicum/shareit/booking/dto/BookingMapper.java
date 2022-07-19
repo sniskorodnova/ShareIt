@@ -3,6 +3,9 @@ package ru.practicum.shareit.booking.dto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 
+/**
+ * Класс, описывающий маппинг бронирования в модели dto и обратно
+ */
 public class BookingMapper {
     public static BookingDto toBookingDto(Booking booking) {
         return new BookingDto(
@@ -24,6 +27,13 @@ public class BookingMapper {
                         null, null),
                 null,
                 null
+        );
+    }
+
+    public static BookingDtoItem toBookingDtoItem(Booking booking) {
+        return new BookingDtoItem(
+                booking.getId(),
+                booking.getBooker().getId()
         );
     }
 }

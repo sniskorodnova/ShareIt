@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.dto;
 
+import ru.practicum.shareit.booking.dto.BookingDtoItem;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 
@@ -9,14 +10,17 @@ import java.util.List;
  * Класс, описывающий маппинг вещи в модель dto и обратно
  */
 public class ItemMapper {
-    public static ItemDtoWithComment toItemDtoWithComment(Item item, List<CommentForItemDto> comments) {
+    public static ItemDtoWithComment toItemDtoWithComment(Item item, List<CommentForItemDto> comments,
+                                                          BookingDtoItem lastBooking, BookingDtoItem nextBooking) {
         return new ItemDtoWithComment(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
                 item.getRequestId() != null ? item.getRequestId() : null,
-                comments
+                comments,
+                lastBooking,
+                nextBooking
         );
     }
 

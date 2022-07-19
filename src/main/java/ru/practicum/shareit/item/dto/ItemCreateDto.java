@@ -6,13 +6,16 @@ import lombok.Data;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+/**
+ * Класс-dto для создания вещи
+ */
 @Data
 @AllArgsConstructor
 public class ItemCreateDto {
-    @NotEmpty(message = "Name must not be empty")
+    @NotEmpty
     private String name;
-    @NotEmpty(message = "Description must not be empty")
+    @NotEmpty
     private String description;
-    @NotNull(message = "Availability must not be empty")
+    @NotNull
     private Boolean available;
 }

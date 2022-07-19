@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * Класс-dto, описывающий сущность вещь
+ * Класс-dto для отображения информации о вещи
  */
 @Data
 @AllArgsConstructor

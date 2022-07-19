@@ -9,6 +9,6 @@ import java.time.LocalDateTime;
 public class ItemRequest {
     private Long id;
     private String description;
-    private User requestor;
+    private long requesterId;
     private LocalDateTime created;
 }

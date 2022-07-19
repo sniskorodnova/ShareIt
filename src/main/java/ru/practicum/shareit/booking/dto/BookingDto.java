@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.practicum.shareit.booking.model.Status;
@@ -9,6 +8,9 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
+/**
+ * Класс-dto для отображения пользователю информации о созданном или измененном бронировании
+ */
 @Data
 @AllArgsConstructor
 public class BookingDto {

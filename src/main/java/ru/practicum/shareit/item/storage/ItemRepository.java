@@ -6,6 +6,9 @@ import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
 
+/**
+ * Репозиторий для работы с вещами
+ */
 public interface ItemRepository extends JpaRepository<Item, Long> {
     @Query("select i from Item i "
             + "where (upper(i.name) like upper(concat('%', ?1, '%')) "

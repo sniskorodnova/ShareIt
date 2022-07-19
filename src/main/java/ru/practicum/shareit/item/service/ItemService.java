@@ -1,13 +1,10 @@
 package ru.practicum.shareit.item.service;
 
-import ru.practicum.shareit.exception.AuthFailedException;
-import ru.practicum.shareit.exception.ItemNotFoundException;
-import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.exception.ValidationException;
 
-import javax.persistence.Column;
 import java.util.List;
 
 /**
@@ -22,9 +19,11 @@ public interface ItemService {
 
     List<Item> getAll(Long userId) throws ValidationException, UserNotFoundException;
 
-    List<Item> searchByText(Long userId, String searchText) throws ValidationException;
+    List<Item> searchByText(Long userId, String searchText) throws UserNotFoundException;
 
     Comment createComment(Long userId, Long itemId, Comment comment) throws ValidationException, UserNotFoundException;
 
     List<Comment> getCommentsForItem(Long itemId);
+    Booking getLastBooking(Long itemId, Long userId);
+    Booking getNextBooking(Long itemId, Long userId);
 }
