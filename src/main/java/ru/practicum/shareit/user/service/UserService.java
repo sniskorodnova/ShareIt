@@ -1,6 +1,8 @@
 package ru.practicum.shareit.user.service;
 
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.exception.EmailAlreadyExistsException;
+import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.exception.ValidationException;
 
 import java.util.List;
@@ -9,13 +11,13 @@ import java.util.List;
  * Интерфейс, описывающий логику для работы сервиса пользователей
  */
 public interface UserService {
-    User create(User user) throws ValidationException;
+    UserDto create(UserDto user) throws ValidationException;
 
-    User update(Long id, User user) throws ValidationException;
+    UserDto update(Long id, UserDto user) throws EmailAlreadyExistsException;
 
-    User getById(Long id);
+    UserDto getById(Long id) throws ValidationException, UserNotFoundException;
 
     void deleteById(Long id);
 
-    List<User> getAll();
+    List<UserDto> getAll();
 }

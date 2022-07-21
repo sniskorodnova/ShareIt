@@ -2,20 +2,13 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.AuthFailedException;
-import ru.practicum.shareit.exception.ErrorResponse;
-import ru.practicum.shareit.exception.NoHeaderException;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.exception.*;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.exception.ValidationException;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,12 +27,13 @@ public class ItemController {
      */
     @PostMapping
     public ItemDto create(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                          @Valid @RequestBody ItemDto item) throws NoHeaderException, ValidationException {
-        log.debug("Входящий запрос на создание вещи" + item.toString());
+                          @Valid @RequestBody ItemCreateDto itemCreate) throws NoHeaderException, UserNotFoundException,
+            ValidationException {
+        log.debug("Входящий запрос на создание вещи: " + itemCreate.toString());
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            return ItemMapper.toItemDto(itemService.create(userId, ItemMapper.toItem(item)));
+            return itemService.create(userId, itemCreate);
         }
     }
 
@@ -48,13 +42,13 @@ public class ItemController {
      */
     @PatchMapping("/{id}")
     public ItemDto update(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                          @PathVariable Long id, @RequestBody ItemDto item)
+                          @PathVariable Long id, @RequestBody ItemCreateDto itemCreate)
             throws NoHeaderException, ValidationException, AuthFailedException {
-        log.debug("Входящий запрос на редактирование вещи" + item.toString());
+        log.debug("Входящий запрос на редактирование вещи: " + itemCreate.toString());
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            return ItemMapper.toItemDto(itemService.update(userId, id, ItemMapper.toItem(item)));
+            return itemService.update(userId, id, itemCreate);
         }
     }
 
@@ -62,13 +56,14 @@ public class ItemController {
      * Метод для получения вещи по ее id
      */
     @GetMapping("/{id}")
-    public ItemDto getById(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                           @PathVariable Long id) throws NoHeaderException, ValidationException {
+    public ItemDtoWithComment getById(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+                           @PathVariable Long id) throws NoHeaderException, ItemNotFoundException,
+            ValidationException, UserNotFoundException {
         log.debug("Входящий запрос на получение вещи по id = {}", id);
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            return ItemMapper.toItemDto(itemService.getById(userId, id));
+            return itemService.getById(userId, id);
         }
     }
 
@@ -76,17 +71,13 @@ public class ItemController {
      * Метод для получения всех вещей
      */
     @GetMapping
-    public List<ItemDto> getAll(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId)
-            throws NoHeaderException, ValidationException {
-        List<ItemDto> listItemDto = new ArrayList<>();
+    public List<ItemDtoWithComment> getAll(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId)
+            throws NoHeaderException, UserNotFoundException, ValidationException {
         log.debug("Входящий запрос на получение всех вещей");
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            for (Item item : itemService.getAll(userId)) {
-                listItemDto.add(ItemMapper.toItemDto(item));
-            }
-            return listItemDto;
+            return itemService.getAll(userId);
         }
     }
 
@@ -95,40 +86,27 @@ public class ItemController {
      */
     @GetMapping("/search")
     public List<ItemDto> searchByText(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                                      @RequestParam String text) throws NoHeaderException, ValidationException {
-        log.debug("Входящий запрос на поиск вещи");
+                                      @RequestParam String text) throws NoHeaderException, UserNotFoundException {
+        log.debug("Входящий запрос на поиск вещи, содержащую текст: {}", text);
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            List<Item> foundItems = itemService.searchByText(userId, text);
-
-            List<ItemDto> listItemDto = new ArrayList<>();
-            if (foundItems == null) {
-                return null;
-            } else {
-                for (Item item : foundItems) {
-                    listItemDto.add(ItemMapper.toItemDto(item));
-                }
-                return listItemDto;
-            }
+            return itemService.searchByText(userId, text);
         }
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleUserNotFound(final NoHeaderException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFound(final ValidationException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleAuthFailed(final AuthFailedException e) {
-        return new ErrorResponse(e.getMessage());
+    /**
+     * Метод для создания отзыва к вещи
+     */
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+                                    @PathVariable Long itemId, @RequestBody @Valid CommentCreateDto comment)
+            throws NoHeaderException, UserNotFoundException, ValidationException {
+        log.debug("Входящий запрос на создание отзыва к вещи с id = " + itemId);
+        if (userId == null) {
+            throw new NoHeaderException("No header in the request");
+        } else {
+            return itemService.createComment(userId, itemId, comment);
+        }
     }
 }
