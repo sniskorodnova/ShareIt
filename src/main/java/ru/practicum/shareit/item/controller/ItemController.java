@@ -2,19 +2,13 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookingDtoItem;
-import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.dto.*;
-import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,13 +27,13 @@ public class ItemController {
      */
     @PostMapping
     public ItemDto create(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                          @Valid @RequestBody ItemCreateDto item) throws NoHeaderException, UserNotFoundException,
+                          @Valid @RequestBody ItemCreateDto itemCreate) throws NoHeaderException, UserNotFoundException,
             ValidationException {
-        log.debug("Входящий запрос на создание вещи" + item.toString());
+        log.debug("Входящий запрос на создание вещи: " + itemCreate.toString());
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            return ItemMapper.toItemDto(itemService.create(userId, ItemMapper.toItemCreate(item)));
+            return itemService.create(userId, itemCreate);
         }
     }
 
@@ -48,13 +42,13 @@ public class ItemController {
      */
     @PatchMapping("/{id}")
     public ItemDto update(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                          @PathVariable Long id, @RequestBody ItemCreateDto item)
+                          @PathVariable Long id, @RequestBody ItemCreateDto itemCreate)
             throws NoHeaderException, ValidationException, AuthFailedException {
-        log.debug("Входящий запрос на редактирование вещи" + item.toString());
+        log.debug("Входящий запрос на редактирование вещи: " + itemCreate.toString());
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            return ItemMapper.toItemDto(itemService.update(userId, id, ItemMapper.toItemCreate(item)));
+            return itemService.update(userId, id, itemCreate);
         }
     }
 
@@ -69,15 +63,7 @@ public class ItemController {
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            List<CommentForItemDto> comments = new ArrayList<>();
-            for (Comment comment : itemService.getCommentsForItem(id)) {
-                comments.add(CommentMapper.toCommentForItemDto(comment));
-            }
-            BookingDtoItem lastBooking = (itemService.getLastBooking(id, userId)) == null ? null
-                    : BookingMapper.toBookingDtoItem(itemService.getLastBooking(id, userId));
-            BookingDtoItem nextBooking = (itemService.getNextBooking(id, userId)) == null ? null
-                    : BookingMapper.toBookingDtoItem(itemService.getNextBooking(id, userId));
-            return ItemMapper.toItemDtoWithComment(itemService.getById(userId, id), comments, lastBooking, nextBooking);
+            return itemService.getById(userId, id);
         }
     }
 
@@ -86,25 +72,12 @@ public class ItemController {
      */
     @GetMapping
     public List<ItemDtoWithComment> getAll(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId)
-            throws NoHeaderException, UserNotFoundException, ValidationException, ItemNotFoundException {
+            throws NoHeaderException, UserNotFoundException, ValidationException {
         log.debug("Входящий запрос на получение всех вещей");
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            List<ItemDtoWithComment> listItemCommentDto = new ArrayList<>();
-            for (Item item : itemService.getAll(userId)) {
-                List<CommentForItemDto> comments = new ArrayList<>();
-                for (Comment comment : itemService.getCommentsForItem(item.getId())) {
-                    comments.add(CommentMapper.toCommentForItemDto(comment));
-                }
-                BookingDtoItem lastBooking = (itemService.getLastBooking(item.getId(), userId)) == null ? null
-                        : BookingMapper.toBookingDtoItem(itemService.getLastBooking(item.getId(), userId));
-                BookingDtoItem nextBooking = (itemService.getNextBooking(item.getId(), userId)) == null ? null
-                        : BookingMapper.toBookingDtoItem(itemService.getNextBooking(item.getId(), userId));
-                listItemCommentDto.add(ItemMapper.toItemDtoWithComment(itemService.getById(userId, item.getId()),
-                        comments, lastBooking, nextBooking));
-            }
-            return listItemCommentDto;
+            return itemService.getAll(userId);
         }
     }
 
@@ -114,21 +87,11 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> searchByText(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                                       @RequestParam String text) throws NoHeaderException, UserNotFoundException {
-        log.debug("Входящий запрос на поиск вещи");
+        log.debug("Входящий запрос на поиск вещи, содержащую текст: {}", text);
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            List<Item> foundItems = itemService.searchByText(userId, text);
-
-            List<ItemDto> listItemDto = new ArrayList<>();
-            if (foundItems == null) {
-                return null;
-            } else {
-                for (Item item : foundItems) {
-                    listItemDto.add(ItemMapper.toItemDto(item));
-                }
-                return listItemDto;
-            }
+            return itemService.searchByText(userId, text);
         }
     }
 
@@ -139,42 +102,11 @@ public class ItemController {
     public CommentDto createComment(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                                     @PathVariable Long itemId, @RequestBody @Valid CommentCreateDto comment)
             throws NoHeaderException, UserNotFoundException, ValidationException {
-        log.debug("Входящий запрос на создание отзыва к вещи" + itemId);
+        log.debug("Входящий запрос на создание отзыва к вещи с id = " + itemId);
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            return CommentMapper.toCommentDto(itemService.createComment(userId, itemId,
-                    CommentMapper.toCommentCreate(comment)));
+            return itemService.createComment(userId, itemId, comment);
         }
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleUserNotFound(final NoHeaderException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidation(final ValidationException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFound(final UserNotFoundException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleItemNotFound(final ItemNotFoundException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleAuthFailed(final AuthFailedException e) {
-        return new ErrorResponse(e.getMessage());
     }
 }

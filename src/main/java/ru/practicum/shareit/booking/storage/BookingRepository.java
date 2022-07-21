@@ -70,7 +70,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> getLastBooking(Long itemId, Long userId);
 
     @Query(value = "select * from bookings b "
-            + "left join items i on i.id = b.item_id "
             + "where b.item_id = ? and b.end_date_time < now() and b.status = 'APPROVED' and b.booker_id = ? ",
             nativeQuery = true)
     List<Booking> findForItem(Long itemId, Long userId);

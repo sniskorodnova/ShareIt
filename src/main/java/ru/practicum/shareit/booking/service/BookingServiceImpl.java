@@ -2,6 +2,9 @@ package ru.practicum.shareit.booking.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.model.Status;
@@ -36,8 +39,9 @@ public class BookingServiceImpl implements BookingService {
      * Метод для создания бронирования с валидациями
      */
     @Override
-    public Booking create(Long userId, Booking booking) throws ItemNotFoundException, UserNotFoundException,
-            ValidationException {
+    public BookingDto create(Long userId, BookingCreateDto bookingCreate) throws ItemNotFoundException,
+            UserNotFoundException, ValidationException {
+        Booking booking = BookingMapper.toBookingCreate(bookingCreate);
         if (userRepository.findById(userId).isEmpty()) {
             throw new UserNotFoundException("User with id = " + userId + " not found");
         } else {
@@ -60,7 +64,7 @@ public class BookingServiceImpl implements BookingService {
                             booking.setStatus(Status.WAITING);
                             booking.setBooker(userRepository.findById(userId).get());
                             booking.setItem(itemRepository.findById(booking.getItem().getId()).orElseThrow());
-                            return bookingRepository.save(booking);
+                            return BookingMapper.toBookingDto(bookingRepository.save(booking));
                         }
                     }
                 }
@@ -72,7 +76,7 @@ public class BookingServiceImpl implements BookingService {
      * Метод для изменения статуса бронирования с валидациями
      */
     @Override
-    public Booking update(Long userId, Long bookingId, Boolean approved) throws UserNotFoundException,
+    public BookingDto update(Long userId, Long bookingId, Boolean approved) throws UserNotFoundException,
             BookingNotFoundException, ItemNotBelongsToUserException, ValidationException {
         if (userRepository.findById(userId).isEmpty()) {
             throw new UserNotFoundException("User with id = " + userId + " not found");
@@ -93,7 +97,7 @@ public class BookingServiceImpl implements BookingService {
                         } else {
                             foundBooking.setStatus(Status.REJECTED);
                         }
-                        return bookingRepository.save(foundBooking);
+                        return BookingMapper.toBookingDto(bookingRepository.save(foundBooking));
                     }
                 }
             }
@@ -104,7 +108,7 @@ public class BookingServiceImpl implements BookingService {
      * Метод для получения информации о бронировании по его id
      */
     @Override
-    public Booking getById(Long userId, Long bookingId) throws ItemNotBelongsToUserException, UserNotFoundException,
+    public BookingDto getById(Long userId, Long bookingId) throws ItemNotBelongsToUserException, UserNotFoundException,
             BookingNotFoundException {
         if (userRepository.findById(userId).isEmpty()) {
             throw new UserNotFoundException("User with id = " + userId + " not found");
@@ -121,7 +125,7 @@ public class BookingServiceImpl implements BookingService {
                     Booking booking = bookingRepository.findById(bookingId).get();
                     booking.setBooker(userRepository.findById(bookerId).orElseThrow());
                     booking.setItem(itemRepository.findById(booking.getItem().getId()).orElseThrow());
-                    return booking;
+                    return BookingMapper.toBookingDto(booking);
                 }
             }
         }
@@ -131,7 +135,7 @@ public class BookingServiceImpl implements BookingService {
      * Метод для получения всех бронирований пользователя в определенном статусе, запрошенном клиентом
      */
     @Override
-    public List<Booking> getAllBookingsForRequester(Long userId, State state) throws UserNotFoundException {
+    public List<BookingDto> getAllBookingsForRequester(Long userId, State state) throws UserNotFoundException {
         if (userRepository.findById(userId).isEmpty()) {
             throw new UserNotFoundException("User with id = " + userId + " not found");
         } else {
@@ -159,7 +163,11 @@ public class BookingServiceImpl implements BookingService {
                             LocalDateTime.now(), LocalDateTime.now());
                     break;
             }
-            return foundBookings;
+            List<BookingDto> listBookingDto = new ArrayList<>();
+            for (Booking booking : foundBookings) {
+                listBookingDto.add(BookingMapper.toBookingDto(booking));
+            }
+            return listBookingDto;
         }
     }
 
@@ -168,7 +176,7 @@ public class BookingServiceImpl implements BookingService {
      * от клиента
      */
     @Override
-    public List<Booking> getAllBookingsForOwner(Long userId, State state) throws UserNotFoundException {
+    public List<BookingDto> getAllBookingsForOwner(Long userId, State state) throws UserNotFoundException {
         if (userRepository.findById(userId).isEmpty()) {
             throw new UserNotFoundException("User with id = " + userId + " not found");
         } else {
@@ -194,7 +202,11 @@ public class BookingServiceImpl implements BookingService {
                             LocalDateTime.now());
                     break;
             }
-            return foundBookings;
+            List<BookingDto> listBookingDto = new ArrayList<>();
+            for (Booking booking : foundBookings) {
+                listBookingDto.add(BookingMapper.toBookingDto(booking));
+            }
+            return listBookingDto;
         }
     }
 }

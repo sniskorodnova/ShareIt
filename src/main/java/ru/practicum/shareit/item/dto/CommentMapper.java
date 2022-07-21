@@ -16,7 +16,7 @@ public class CommentMapper {
         );
     }
 
-    public static Comment toCommentCreate(CommentCreateDto commentCreateDto) {
+    public static Comment toCommentForCreate(CommentCreateDto commentCreateDto) {
         return new Comment(
                 null,
                 commentCreateDto.getText(),

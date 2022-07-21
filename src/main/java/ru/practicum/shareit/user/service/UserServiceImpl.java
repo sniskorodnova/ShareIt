@@ -2,11 +2,15 @@ package ru.practicum.shareit.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.EmailAlreadyExistsException;
 import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.storage.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,40 +31,41 @@ public class UserServiceImpl implements UserService {
      * Метод для создания пользователя
      */
     @Override
-    public User create(User user) throws ValidationException {
-        return userRepository.save(user);
+    public UserDto create(UserDto user) throws ValidationException {
+        return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(user)));
     }
 
     /**
      * Метод для редактирования пользователя
      */
     @Override
-    public User update(Long id, User user) throws ValidationException {
+    public UserDto update(Long id, UserDto user) throws EmailAlreadyExistsException {
         Optional<User> userFromList = userRepository.findById(id);
         user.setId(id);
+
         if (user.getName() == null) {
-            user.setName(userFromList.get().getName());
+            user.setName(userFromList.orElseThrow().getName());
         }
         if (user.getEmail() == null) {
-            user.setEmail(userFromList.get().getEmail());
+            user.setEmail(userFromList.orElseThrow().getEmail());
         }
         for (User userToFind : userRepository.findAll()) {
             if ((!Objects.equals(userToFind.getId(), user.getId())) && userToFind.getEmail().equals(user.getEmail())) {
-                throw new ValidationException("Пользователь с таким email уже существует");
+                throw new EmailAlreadyExistsException("Пользователь с таким email уже существует");
             }
         }
-        return userRepository.save(user);
+        return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(user)));
     }
 
     /**
      * Метод для получения пользователя по id
      */
     @Override
-    public User getById(Long id) throws UserNotFoundException {
+    public UserDto getById(Long id) throws UserNotFoundException {
         if (userRepository.findById(id).isEmpty()) {
             throw new UserNotFoundException("User with id = " + id + " doesn't exist");
         } else {
-            return userRepository.findById(id).get();
+            return UserMapper.toUserDto(userRepository.findById(id).get());
         }
     }
 
@@ -68,8 +73,13 @@ public class UserServiceImpl implements UserService {
      * Метод для получения списка всех пользователей
      */
     @Override
-    public List<User> getAll() {
-        return userRepository.findAll();
+    public List<UserDto> getAll() {
+        List<UserDto> listUserDto = new ArrayList<>();
+
+        for (User user : userRepository.findAll()) {
+            listUserDto.add(UserMapper.toUserDto(user));
+        }
+        return listUserDto;
     }
 
     /**

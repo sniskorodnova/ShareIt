@@ -33,7 +33,7 @@ public class ItemMapper {
         );
     }
 
-    public static Item toItemCreate(ItemCreateDto itemCreateDto) {
+    public static Item toItemForCreate(ItemCreateDto itemCreateDto) {
         return new Item(
                 null,
                 itemCreateDto.getName(),
