@@ -16,9 +16,10 @@ public interface ItemService {
     ItemDtoWithComment getById(Long userId, Long id) throws ValidationException, ItemNotFoundException,
             UserNotFoundException;
 
-    List<ItemDtoWithComment> getAll(Long userId) throws ValidationException, UserNotFoundException;
+    List<ItemDtoWithComment> getAllWithPagination(Long userId, Integer from, Integer size) throws UserNotFoundException;
 
-    List<ItemDto> searchByText(Long userId, String searchText) throws UserNotFoundException;
+    List<ItemDto> searchByTextWithPagination(Long userId, String searchText, Integer from, Integer size)
+            throws UserNotFoundException;
 
     CommentDto createComment(Long userId, Long itemId, CommentCreateDto commentCreate) throws ValidationException,
             UserNotFoundException;

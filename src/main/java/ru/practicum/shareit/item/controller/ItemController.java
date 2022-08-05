@@ -9,6 +9,7 @@ import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 /**
@@ -57,7 +58,7 @@ public class ItemController {
      */
     @GetMapping("/{id}")
     public ItemDtoWithComment getById(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                           @PathVariable Long id) throws NoHeaderException, ItemNotFoundException,
+                                      @PathVariable Long id) throws NoHeaderException, ItemNotFoundException,
             ValidationException, UserNotFoundException {
         log.debug("Входящий запрос на получение вещи по id = {}", id);
         if (userId == null) {
@@ -71,13 +72,15 @@ public class ItemController {
      * Метод для получения всех вещей
      */
     @GetMapping
-    public List<ItemDtoWithComment> getAll(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId)
-            throws NoHeaderException, UserNotFoundException, ValidationException {
+    public List<ItemDtoWithComment> getAll(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+                                           @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+                                           @RequestParam(required = false, defaultValue = "10") @Min(1) Integer size)
+            throws NoHeaderException, UserNotFoundException {
         log.debug("Входящий запрос на получение всех вещей");
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            return itemService.getAll(userId);
+            return itemService.getAllWithPagination(userId, from, size);
         }
     }
 
@@ -86,12 +89,15 @@ public class ItemController {
      */
     @GetMapping("/search")
     public List<ItemDto> searchByText(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                                      @RequestParam String text) throws NoHeaderException, UserNotFoundException {
+                                      @RequestParam String text,
+                                      @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+                                      @RequestParam(required = false, defaultValue = "10") @Min(1) Integer size)
+            throws NoHeaderException, UserNotFoundException {
         log.debug("Входящий запрос на поиск вещи, содержащую текст: {}", text);
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
-            return itemService.searchByText(userId, text);
+            return itemService.searchByTextWithPagination(userId, text, from, size);
         }
     }
 

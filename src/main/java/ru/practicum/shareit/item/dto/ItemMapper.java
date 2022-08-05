@@ -40,7 +40,7 @@ public class ItemMapper {
                 itemCreateDto.getDescription(),
                 itemCreateDto.getAvailable(),
                 null,
-                null
+                itemCreateDto.getRequestId() != null ? itemCreateDto.getRequestId() : null
         );
     }
 }

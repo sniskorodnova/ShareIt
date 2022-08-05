@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDtoItem;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -107,12 +108,13 @@ public class ItemServiceImpl implements ItemService {
      * Метод для получения списка всех вещей
      */
     @Override
-    public List<ItemDtoWithComment> getAll(Long userId) throws UserNotFoundException {
+    public List<ItemDtoWithComment> getAllWithPagination(Long userId, Integer from, Integer size)
+            throws UserNotFoundException {
         if (!userRepository.findById(userId).isPresent()) {
             throw new UserNotFoundException("No user with id = " + userId);
         } else {
             List<Item> itemToReturn = new ArrayList<>();
-            for (Item item : itemRepository.findAll()) {
+            for (Item item : itemRepository.findAllByOrderByIdAsc(PageRequest.of(from / size, size))) {
                 if (Objects.equals(item.getOwnerId(), userId)) {
                     itemToReturn.add(item);
                 }
@@ -137,12 +139,13 @@ public class ItemServiceImpl implements ItemService {
      * Метод для поиска вещей по буквосочетанию
      */
     @Override
-    public List<ItemDto> searchByText(Long userId, String searchText) throws UserNotFoundException {
+    public List<ItemDto> searchByTextWithPagination(Long userId, String searchText, Integer from, Integer size)
+            throws UserNotFoundException {
         if (userRepository.findById(userId).isPresent()) {
             if (searchText.isEmpty()) {
                 return Collections.emptyList();
             } else {
-                List<Item> foundItems = itemRepository.search(searchText);
+                List<Item> foundItems = itemRepository.search(searchText, PageRequest.of(from / size, size));
 
                 List<ItemDto> listItemDto = new ArrayList<>();
                 if (foundItems == null) {

@@ -11,6 +11,7 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 /**
@@ -30,9 +31,13 @@ public class BookingController {
     @PostMapping
     public BookingDto create(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                              @Valid @RequestBody BookingCreateDto booking) throws ItemNotFoundException,
-            UserNotFoundException, ValidationException {
+            UserNotFoundException, ValidationException, NoHeaderException {
         log.debug("Входящий запрос на создание запроса на бронирование: " + booking.toString());
-        return bookingService.create(userId, booking);
+        if (userId == null) {
+            throw new NoHeaderException("No header in the request");
+        } else {
+            return bookingService.create(userId, booking);
+        }
     }
 
     /**
@@ -40,7 +45,7 @@ public class BookingController {
      */
     @PatchMapping("/{bookingId}")
     public BookingDto update(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                          @PathVariable Long bookingId, @RequestParam Boolean approved) throws NoHeaderException,
+                             @PathVariable Long bookingId, @RequestParam Boolean approved) throws NoHeaderException,
             UserNotFoundException, BookingNotFoundException, ItemNotBelongsToUserException, ValidationException {
         log.debug("Входящий запрос на редактирование статуса запроса на бронирование");
         if (userId == null) {
@@ -55,7 +60,7 @@ public class BookingController {
      */
     @GetMapping("/{bookingId}")
     public BookingDto getById(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                             @PathVariable Long bookingId) throws NoHeaderException,
+                              @PathVariable Long bookingId) throws NoHeaderException,
             UserNotFoundException, BookingNotFoundException, ItemNotBelongsToUserException {
         log.debug("Входящий запрос на получение информации по бронированию с id = {}", bookingId);
         if (userId == null) {
@@ -70,13 +75,22 @@ public class BookingController {
      */
     @GetMapping()
     public List<BookingDto> getAllBookingsForRequester(@RequestHeader(value = "X-Sharer-User-Id", required = false)
-                                                      Long userId, @RequestParam(defaultValue = "ALL") State state)
-            throws NoHeaderException, UserNotFoundException {
-        if (userId == null) {
-            throw new NoHeaderException("No header in the request");
-        } else {
-            log.debug("Входящий запрос на получение информации по всем бронированиям для пользователю {}", userId);
-            return bookingService.getAllBookingsForRequester(userId, state);
+                                                       Long userId, @RequestParam(defaultValue = "ALL") String state,
+                                                       @RequestParam(required = false, defaultValue = "0")
+                                                       @Min(0) Integer from,
+                                                       @RequestParam(required = false, defaultValue = "10")
+                                                       @Min(1) Integer size)
+            throws NoHeaderException, UserNotFoundException, UnsupportedStatusException {
+        try {
+            State stateToConvert = State.valueOf(state);
+            if (userId == null) {
+                throw new NoHeaderException("No header in the request");
+            } else {
+                log.debug("Входящий запрос на получение информации по всем бронированиям для пользователю {}", userId);
+                return bookingService.getAllBookingsForRequesterWithPagination(userId, stateToConvert, from, size);
+            }
+        } catch (IllegalArgumentException e) {
+            throw new UnsupportedStatusException("Unknown state: " + state);
         }
     }
 
@@ -86,13 +100,22 @@ public class BookingController {
      */
     @GetMapping("/owner")
     public List<BookingDto> getAllBookingsForOwner(@RequestHeader(value = "X-Sharer-User-Id", required = false)
-                                                       Long userId, @RequestParam(defaultValue = "ALL") State state)
-            throws NoHeaderException, UserNotFoundException {
-        if (userId == null) {
-            throw new NoHeaderException("No header in the request");
-        } else {
-            log.debug("Входящий запрос на получение информации по всем бронированиям для владельца {}", userId);
-            return bookingService.getAllBookingsForOwner(userId, state);
+                                                   Long userId, @RequestParam(defaultValue = "ALL") String state,
+                                                   @RequestParam(required = false, defaultValue = "0")
+                                                   @Min(0) Integer from,
+                                                   @RequestParam(required = false, defaultValue = "10")
+                                                   @Min(1) Integer size)
+            throws NoHeaderException,UserNotFoundException, UnsupportedStatusException {
+        try {
+            State stateToConvert = State.valueOf(state);
+            if (userId == null) {
+                throw new NoHeaderException("No header in the request");
+            } else {
+                log.debug("Входящий запрос на получение информации по всем бронированиям для владельца {}", userId);
+                return bookingService.getAllBookingsForOwnerWithPagination(userId, stateToConvert, from, size);
+            }
+        } catch (IllegalArgumentException e) {
+            throw new UnsupportedStatusException("Unknown state: " + state);
         }
     }
 }

@@ -57,4 +57,17 @@ public class ExceptionControllerAdvice {
     public ErrorResponse handleEmailAlreadyExists(final EmailAlreadyExistsException e) {
         return new ErrorResponse(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleUnsupportedStatus(final UnsupportedStatusException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleItemRequestNotFound(final ItemRequestNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
 }
