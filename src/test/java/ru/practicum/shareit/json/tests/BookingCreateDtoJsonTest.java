@@ -17,10 +17,10 @@ public class BookingCreateDtoJsonTest {
     private JacksonTester<BookingCreateDto> json;
 
     @Test
-    void TestBookingCreateDto() throws Exception {
+    void testBookingCreateDto() throws Exception {
         BookingCreateDto bookingCreateDto = new BookingCreateDto(
                 LocalDateTime.of(2022, 07, 22, 07, 35),
-                LocalDateTime.of (2022, 07, 25, 10, 00),
+                LocalDateTime.of(2022, 07, 25, 10, 00),
                 1L
         );
         JsonContent<BookingCreateDto> result = json.write(bookingCreateDto);

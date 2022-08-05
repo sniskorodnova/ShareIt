@@ -15,7 +15,7 @@ public class UserDtoJsonTest {
     private JacksonTester<UserDto> json;
 
     @Test
-    void TestBookingCreateDto() throws Exception {
+    void testBookingCreateDto() throws Exception {
         UserDto userDto = new UserDto(
                 1L,
                 "Name",

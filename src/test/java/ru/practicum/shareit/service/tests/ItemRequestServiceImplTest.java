@@ -10,17 +10,13 @@ import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoWithComment;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
 import ru.practicum.shareit.request.dto.ItemRequestDtoWithItems;
-import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
