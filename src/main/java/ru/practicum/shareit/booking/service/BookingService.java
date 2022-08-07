@@ -20,7 +20,9 @@ public interface BookingService {
     BookingDto getById(Long userId, Long bookingId) throws ItemNotBelongsToUserException, UserNotFoundException,
             BookingNotFoundException;
 
-    List<BookingDto> getAllBookingsForRequester(Long userId, State state) throws UserNotFoundException;
+    List<BookingDto> getAllBookingsForRequesterWithPagination(Long userId, State state, Integer from, Integer size)
+            throws UserNotFoundException;
 
-    List<BookingDto> getAllBookingsForOwner(Long userId, State state) throws UserNotFoundException;
+    List<BookingDto> getAllBookingsForOwnerWithPagination(Long userId, State state, Integer from, Integer size)
+            throws UserNotFoundException;
 }
