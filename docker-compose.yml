@@ -21,9 +21,6 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/share_it
       - POSTGRES_USER=share_root
       - POSTGRES_PASSWORD=root
-      - SPRING_H2_DATASOURCE_URL=jdbc:h2:mem:shareit
-      - H2_NAME=test
-      - H2_PASSWORD=test
 
   db:
     image: postgres:13.8-alpine
