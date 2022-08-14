@@ -106,8 +106,6 @@ public class ItemControllerTest {
 
     @Test
     public void shouldReturnAllItemsInfo() throws Exception {
-        ItemDto itemDto = new ItemDto(1L, "Item name", "Item description", true,
-                1L);
         ItemDtoWithComment itemDtoWithCommentFirst = new ItemDtoWithComment(1L, "Item first name",
                 "Item first description", true, 1L, null, null,
                 null);
@@ -120,7 +118,7 @@ public class ItemControllerTest {
 
         when(itemService.getAllWithPagination(anyLong(), anyInt(), anyInt()))
                 .thenReturn(listItems);
-        mockMvc.perform(get("/items").header("X-Sharer-User-Id", "1")
+        mockMvc.perform(get("/items?from=0&size=5").header("X-Sharer-User-Id", "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
