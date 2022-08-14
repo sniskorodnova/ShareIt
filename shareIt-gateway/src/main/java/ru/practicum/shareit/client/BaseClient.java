@@ -35,16 +35,8 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.POST, path, userId, parameters, body);
     }
 
-    private <T> ResponseEntity<Object> put(String path, Long userId, @Nullable Map<String, Object> parameters, T body) {
-        return makeAndSendRequest(HttpMethod.PUT, path, userId, parameters, body);
-    }
-
     protected <T> ResponseEntity<Object> patch(String path, Long userId, T body) {
         return patch(path, userId, null, body);
-    }
-
-    protected <T> ResponseEntity<Object> put(String path, long userId, T body) {
-        return put(path, userId, null, body);
     }
 
     private <T> ResponseEntity<Object> patch(String path, Long userId, @Nullable Map<String, Object> parameters, T body) {
@@ -87,13 +79,13 @@ public class BaseClient {
     }
 
     private static ResponseEntity<Object> prepareGatewayResponse(ResponseEntity<Object> response) {
-        if(response.getStatusCode().is2xxSuccessful()) {
+        if (response.getStatusCode().is2xxSuccessful()) {
             return response;
         }
 
         ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(response.getStatusCode());
 
-        if(response.hasBody()) {
+        if (response.hasBody()) {
             return responseBuilder.body(response.getBody());
         }
 
