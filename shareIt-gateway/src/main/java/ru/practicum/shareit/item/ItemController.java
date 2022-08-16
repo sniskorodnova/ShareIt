@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.exception.NoHeaderException;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
@@ -20,9 +21,9 @@ public class ItemController {
     private final ItemClient itemClient;
 
     @PostMapping
-    public Object create(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+    public Object create(@RequestHeader(value = BaseClient.USER_ID_HEADER, required = false) Long userId,
                          @RequestBody @Valid ItemCreateDto itemCreate) throws NoHeaderException {
-        log.debug("Входящий запрос на создание вещи: " + itemCreate.toString());
+        log.info("Входящий запрос на создание вещи: " + itemCreate.toString());
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
@@ -31,9 +32,9 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public Object update(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+    public Object update(@RequestHeader(value = BaseClient.USER_ID_HEADER, required = false) Long userId,
                          @PathVariable Long itemId, @RequestBody ItemCreateDto itemCreate) throws NoHeaderException {
-        log.debug("Входящий запрос на редактирование вещи: " + itemCreate.toString());
+        log.info("Входящий запрос на редактирование вещи: " + itemCreate.toString());
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
@@ -42,9 +43,9 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public Object getById(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+    public Object getById(@RequestHeader(value = BaseClient.USER_ID_HEADER, required = false) Long userId,
                           @PathVariable Long itemId) throws NoHeaderException {
-        log.debug("Входящий запрос на получение вещи по id = {}", itemId);
+        log.info("Входящий запрос на получение вещи по id = {}", itemId);
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
@@ -53,11 +54,11 @@ public class ItemController {
     }
 
     @GetMapping
-    public Object getAll(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+    public Object getAll(@RequestHeader(value = BaseClient.USER_ID_HEADER, required = false) Long userId,
                          @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
                          @RequestParam(required = false, defaultValue = "10") @Min(1) Integer size)
             throws NoHeaderException {
-        log.debug("Входящий запрос на получение всех вещей");
+        log.info("Входящий запрос на получение всех вещей");
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
@@ -66,12 +67,12 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Object searchByText(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+    public Object searchByText(@RequestHeader(value = BaseClient.USER_ID_HEADER, required = false) Long userId,
                                @RequestParam String text,
                                @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
                                @RequestParam(required = false, defaultValue = "10") @Min(1) Integer size)
             throws NoHeaderException {
-        log.debug("Входящий запрос на поиск вещи, содержащую текст: {}", text);
+        log.info("Входящий запрос на поиск вещи, содержащую текст: {}", text);
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {
@@ -80,10 +81,10 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public Object createComment(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+    public Object createComment(@RequestHeader(value = BaseClient.USER_ID_HEADER, required = false) Long userId,
                                 @PathVariable Long itemId, @RequestBody @Valid CommentCreateDto comment)
             throws NoHeaderException {
-        log.debug("Входящий запрос на создание отзыва к вещи с id = " + itemId);
+        log.info("Входящий запрос на создание отзыва к вещи с id = " + itemId);
         if (userId == null) {
             throw new NoHeaderException("No header in the request");
         } else {

@@ -15,7 +15,7 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleUnsupportedStatus(final UnsupportedStatusException e) {
+    public ErrorResponse handleWrongStatus(final IllegalArgumentException e) {
         return new ErrorResponse(e.getMessage());
     }
 }

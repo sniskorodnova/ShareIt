@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.controller.BookingController;
 import ru.practicum.shareit.exception.ItemRequestNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
@@ -28,7 +29,7 @@ public class ItemRequestController {
      * Метод для создания запроса на вещь
      */
     @PostMapping
-    public ItemRequestDto create(@RequestHeader(value = "X-Sharer-User-Id") Long userId,
+    public ItemRequestDto create(@RequestHeader(value = BookingController.USER_HEADER_ID) Long userId,
                                  @RequestBody ItemRequestCreateDto itemRequestCreate)
             throws UserNotFoundException {
         return itemRequestService.create(userId, itemRequestCreate);
@@ -38,7 +39,8 @@ public class ItemRequestController {
      * Метод для получения списка своих запросов вместе с данными об ответах на них
      */
     @GetMapping()
-    public List<ItemRequestDtoWithItems> getByRequesterId(@RequestHeader(value = "X-Sharer-User-Id") Long userId)
+    public List<ItemRequestDtoWithItems> getByRequesterId(@RequestHeader(value = BookingController.USER_HEADER_ID)
+                                                              Long userId)
             throws UserNotFoundException, ItemRequestNotFoundException {
         return itemRequestService.getByRequesterId(userId);
     }
@@ -47,7 +49,7 @@ public class ItemRequestController {
      * Метод для получения информации об одном конкретном запросе вместе с данными об ответах на него
      */
     @GetMapping("/{requestId}")
-    public ItemRequestDtoWithItems getById(@RequestHeader(value = "X-Sharer-User-Id") Long userId,
+    public ItemRequestDtoWithItems getById(@RequestHeader(value = BookingController.USER_HEADER_ID) Long userId,
                                            @PathVariable Long requestId)
             throws UserNotFoundException, ItemRequestNotFoundException {
         return itemRequestService.getById(requestId, userId);
@@ -57,7 +59,7 @@ public class ItemRequestController {
      * Метод для получения списка запросов, созданных другими пользователями
      */
     @GetMapping("/all")
-    public List<ItemRequestDtoWithItems> getAll(@RequestHeader(value = "X-Sharer-User-Id") Long userId,
+    public List<ItemRequestDtoWithItems> getAll(@RequestHeader(value = BookingController.USER_HEADER_ID) Long userId,
                                                 @RequestParam Integer from, @RequestParam Integer size)
             throws UserNotFoundException, ItemRequestNotFoundException {
         return itemRequestService.getAllWithPagination(userId, from, size);

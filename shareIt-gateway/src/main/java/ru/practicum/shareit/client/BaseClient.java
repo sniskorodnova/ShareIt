@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BaseClient {
+    public static final String USER_ID_HEADER = "X-Sharer-User-Id";
     protected final RestTemplate rest;
 
     public BaseClient(RestTemplate rest) {
